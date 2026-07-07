@@ -122,6 +122,19 @@ signals are the inflight/queue gauges: `active_requests`, `reply_queue_depth`,
 - `{inode,file_handle,dir_handle}_count` → kept **per-instance**, not summed
   across instances.
 
+### Data I/O: fleet total vs per-instance
+
+The Stream IO row has two complementary views of read/write throughput and IOPS:
+
+- **Fleet total** (`IO throughput`, `read/write comparison`) → `sum by(io_type,
+  path_type)` — collapses all selected instances into one read + one write line.
+  Use it for the aggregate rate across the fleet.
+- **Per-instance** (`Per-instance data throughput`, `Per-instance IOPS`) → `sum
+  by(instance,io_type)` — one line per instance per io_type, so with
+  `$instance=All` you can compare each instance's data-IO throughput (B/s, success
+  bytes) and IOPS (io_requests/s, all statuses). `$path_type` still filters but is
+  not split into separate lines, to keep the legend readable.
+
 ## DevOps Triage Matrix
 
 Enter from a **symptom**; the row tells you where to look and what to do next.

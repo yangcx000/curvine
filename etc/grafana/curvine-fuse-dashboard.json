@@ -411,7 +411,7 @@
         "textMode": "value_and_name",
         "orientation": "horizontal"
       },
-      "description": "Fleet FUSE-fd health counts over reachable instances: HEALTHY = kernel_fd_health==1, UNHEALTHY = kernel_fd_health==0 (process reachable but FUSE fd/session unhealthy). UNHEALTHY>0 turns red. NOTE: a down process (up==0) exports no kernel_fd_health, so it appears in NEITHER count — read this together with the Availability DOWN count. Sizes are independent of instance count; per-instance detail is in the 'Per-instance overview' table."
+      "description": "Fleet FUSE-fd health counts over reachable instances: HEALTHY = kernel_fd_health==1, UNHEALTHY = kernel_fd_health==0 (process reachable but FUSE fd/session unhealthy). UNHEALTHY>0 turns red. NOTE: a down process (up==0) exports no kernel_fd_health, so it appears in NEITHER count \u2014 read this together with the Availability DOWN count. Sizes are independent of instance count; per-instance detail is in the 'Per-instance overview' table."
     },
     {
       "id": 4,
@@ -4240,6 +4240,114 @@
               "sort": "desc"
             }
           }
+        },
+        {
+          "id": 80,
+          "type": "timeseries",
+          "title": "Per-instance data throughput (B/s, by io_type)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 179
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "sum by(instance,io_type)(rate(curvine_fuse_io_bytes_total{instance=~\"$instance\",io_type=~\"$io_type\",path_type=~\"$path_type\",status=\"success\"}[$__rate_interval]))",
+              "refId": "A",
+              "legendFormat": "{{instance}}/{{io_type}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "unit": "Bps"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "description": "Successful data-IO throughput per instance, split by io_type (read/write). sum by(instance,io_type) so each selected instance shows its own read+write lines when $instance=All. path_type is filtered by $path_type but not split into separate lines. Success bytes only. For fleet totals see the companion IO throughput panel."
+        },
+        {
+          "id": 81,
+          "type": "timeseries",
+          "title": "Per-instance IOPS (io_requests/s, by io_type)",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 179
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${datasource}"
+              },
+              "expr": "sum by(instance,io_type)(rate(curvine_fuse_io_requests_total{instance=~\"$instance\",io_type=~\"$io_type\",path_type=~\"$path_type\"}[$__rate_interval]))",
+              "refId": "A",
+              "legendFormat": "{{instance}}/{{io_type}}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "showPoints": "never",
+                "spanNulls": true
+              },
+              "unit": "iops"
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "displayMode": "table",
+              "placement": "bottom",
+              "calcs": [
+                "lastNotNull",
+                "max"
+              ]
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          },
+          "description": "Data-IO operations/sec per instance, split by io_type (read/write). ALL statuses (success+error) so it reflects total offered IOPS; pair with the IO error rate panel for the failing fraction. sum by(instance,io_type); path_type filtered by $path_type but not split. For fleet totals see the read/write comparison table."
         }
       ]
     },
